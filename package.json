@@ -1,0 +1,37 @@
+{
+	"name": "create-vvv",
+	"version": "1.0.0",
+	"description": "Scaffold a Vercel + Vite + Vue 3 project",
+	"type": "module",
+	"bin": {
+		"create-vvv": "bin/create.js"
+	},
+	"files": [
+		"bin",
+		"template",
+		"template-router"
+	],
+	"engines": {
+		"node": ">=20"
+	},
+	"dependencies": {
+		"@clack/prompts": "^1.2.0"
+	},
+	"keywords": [
+		"vue",
+		"vite",
+		"vercel",
+		"create",
+		"scaffold",
+		"tailwind"
+	],
+	"license": "MIT",
+	"author": {
+		"name": "Peter Benoit",
+		"url": "https://peterbenoit.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/peterbenoit/VercelViteVue.git"
+	}
+}

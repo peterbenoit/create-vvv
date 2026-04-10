@@ -1,200 +1,103 @@
-# 🚀 Vercel + Vite + Vue Setup
+# create-vvv
 
-![Vue.js](https://img.shields.io/badge/Vue.js-3.4.0-4FC08D?style=flat-square&logo=vue.js)
-![Vite](https://img.shields.io/badge/Vite-5.0.0-646CFF?style=flat-square&logo=vite)
+![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=flat-square&logo=vue.js)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite)
 ![Vercel](https://img.shields.io/badge/Vercel-Ready-000000?style=flat-square&logo=vercel)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3.0-38B2AC?style=flat-square&logo=tailwind-css)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css)
 
-A streamlined Bash script to scaffold a modern Vue 3 project with Vite, Tailwind CSS, serverless API endpoints, and a complete development setup. This template creates a production-ready project structure that works seamlessly in both local development and Vercel deployments.
+Scaffold a modern Vue 3 project with Vite, Tailwind CSS v4, Pinia, and Vercel serverless API routes — in one command. No bash required, works on any platform.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/peterbenoit/vvv-init/main/screenshots/preview.png" alt="Project Preview" width="600">
 </p>
 
-## ✨ Features
-
-- **Frontend**: Vue 3 with Composition API and SFCs
-- **Build System**: Vite for lightning-fast development
-- **Styling**: Tailwind CSS with DaisyUI components
-- **State Management**: Pinia store integration
-- **API Integration**: Serverless API endpoints via Vercel
-- **SEO Support**: @vueuse/head for managing document head
-- **Code Quality**: ESLint, Prettier, and Husky pre-commit hooks
-- **Testing**: Vitest and Vue Test Utils setup
-- **Optional**: Vue Router support for multi-page applications
-- **Deployment-ready**: Configured for instant Vercel deployment
-
-## 🛠️ Installation
-
-Clone this repository or download the `setup.sh` script:
+## Usage
 
 ```bash
-# Make the script executable
-chmod +x setup.sh
-
-# Run the script
-./setup.sh
+npm create vvv@latest my-project
+# or with a name prompt
+npm create vvv@latest
 ```
 
-## 👨‍💻 Usage
+You'll be walked through:
+1. **Project name** (or pass it as an argument)
+2. **Vue Router** — optional multi-page support
+3. **DaisyUI** — optional component library (Tailwind v4-compatible)
+4. **Git init** — initializes a repo with an initial commit
 
-During setup, you'll be prompted to:
-
-1. **Clean directory**: Optionally remove all existing files (except setup.sh)
-2. **Add Vue Router**: Optionally include Vue Router for multi-page applications
-3. **Initialize Git**: Set up a Git repository with initial commit
-4. **Set remote origin**: Connect to a remote Git repository
-5. **Launch dev server**: Start the development server immediately
-
-### Directory Structure
+## What you get
 
 ```
 my-project/
-├── api/                # Serverless API endpoints
-│   └── hello.js        # Example API route
-├── public/             # Static assets
-│   └── favicon.svg
+├── api/
+│   └── hello.js          # Example Vercel serverless function
+├── public/
+│   ├── favicon.svg
+│   └── robots.txt
 ├── src/
-│   ├── pages/          # (If using Vue Router)
-│   ├── App.vue         # Root component
-│   ├── main.js         # Application entry
-│   ├── router.js       # (If using Vue Router)
-│   └── style.css       # Global styles with Tailwind
-├── .env                # Environment variables
+│   ├── App.vue            # Root component
+│   ├── main.js            # App entry (Vue + Pinia + @unhead/vue)
+│   └── style.css          # @import "tailwindcss"
+├── .env                   # VITE_API_BASE and private vars
 ├── .gitignore
-├── index.html          # HTML entry point
+├── eslint.config.js       # ESLint v9 flat config
+├── index.html
 ├── package.json
-├── tailwind.config.js
-└── vercel.json         # Vercel configuration
+├── vercel.json
+└── vite.config.js         # Vite + @tailwindcss/vite plugin + vitest
 ```
 
-## 🌐 Environment Variables
+With Vue Router selected, `src/router.js` and `src/pages/` are added.
 
-The project comes pre-configured with environment variables support:
+## Stack
 
-- **Frontend variables** (prefixed with `VITE_`):
-  ```
-  VITE_PUBLIC_MESSAGE=Hello from the frontend
-  VITE_API_BASE=/api
-  ```
+| Layer | Tech |
+|---|---|
+| Framework | Vue 3 + Composition API |
+| Build | Vite 6 |
+| Styling | Tailwind CSS v4 via `@tailwindcss/vite` |
+| State | Pinia |
+| Head / SEO | `@unhead/vue` |
+| API routes | Vercel serverless functions |
+| Linting | ESLint v9 flat config + `eslint-plugin-vue` |
+| Formatting | Prettier (config in `package.json`) |
+| Git hooks | Husky v9 (pre-commit: Prettier + re-stage) |
+| Testing | Vitest + `@vue/test-utils` |
 
-- **Backend variables** (private to API routes):
-  ```
-  PRIVATE_BACKEND_SECRET=shhh this is secret
-  ```
+## Environment variables
 
-## 💻 Development
+```
+VITE_PUBLIC_MESSAGE=Hello from the frontend   # exposed to browser
+VITE_API_BASE=/api                             # API base path
+PRIVATE_BACKEND_SECRET=replace-this-secret    # server-only
+```
 
-### Local Development
+## Commands (in generated project)
 
 ```bash
-# Standard Vite development
-npm run dev
-
-# Full Vercel emulation (including API routes)
-npm run vercel-dev
+npm run dev          # Vite dev server
+npx vercel dev       # Vite + API routes locally
+npm run build        # Production build
+npm test             # Vitest
+npm run lint         # ESLint
+npm run format       # Prettier
 ```
 
-### Building for Production
+## Publishing
 
 ```bash
-npm run build
+# Dry run — check what gets included
+npm pack --dry-run
+
+# Publish
+npm publish --access public
 ```
 
-### Testing
+## Author
 
-```bash
-# Run tests
-npm test
-```
+[Peter Benoit](https://peterbenoit.com)
 
-## 🚢 Deployment
-
-This project is configured for immediate deployment on Vercel:
-
-```bash
-# Install Vercel CLI if not installed
-npm i -g vercel
-
-# Deploy to Vercel
-vercel
-```
-
-## 🧩 Extending the Project
-
-### Adding Components
-
-Create reusable components in `src/components/`:
-
-```bash
-mkdir -p src/components
-touch src/components/Button.vue
-```
-
-### Adding Meta Tags and SEO
-
-The project includes [@vueuse/head](https://github.com/vueuse/head) for managing document head:
-
-```js
-import { useHead } from '@vueuse/head'
-
-useHead({
-  title: 'My Page Title',
-  meta: [
-    { name: 'description', content: 'Page description' },
-    { property: 'og:title', content: 'My Page Title' }
-  ],
-  link: [
-    { rel: 'canonical', href: 'https://example.com/page' }
-  ]
-})
-```
-
-### Working with Axios
-
-The project includes [Axios](https://axios-http.com/) for making HTTP requests:
-
-```js
-import axios from 'axios'
-
-// Basic GET request
-const fetchData = async () => {
-  try {
-    const response = await axios.get('https://api.example.com/data')
-    console.log(response.data)
-  } catch (error) {
-    console.error('Error fetching data:', error)
-  }
-}
-
-// POST request with data
-const submitData = async (data) => {
-  try {
-    const response = await axios.post('https://api.example.com/submit', data)
-    return response.data
-  } catch (error) {
-    console.error('Error submitting data:', error)
-    throw error
-  }
-}
-```
-
-### Adding API Routes
-
-Create new API endpoints in the `api/` directory:
-
-```bash
-touch api/users.js
-```
-
-## 📄 License
+## License
 
 MIT
 
-## 🙏 Acknowledgements
-
-- [Vue.js](https://vuejs.org/)
-- [Vite](https://vitejs.dev/)
-- [Vercel](https://vercel.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [DaisyUI](https://daisyui.com/)
