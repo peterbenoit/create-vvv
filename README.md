@@ -25,6 +25,18 @@ You'll be walked through:
 3. **DaisyUI** — optional component library (Tailwind v4-compatible)
 4. **Git init** — initializes a repo with an initial commit
 
+### Non-interactive flags
+
+```bash
+npm create vvv@latest my-app --yes           # accept all defaults
+npm create vvv@latest my-app --router        # pre-select Vue Router
+npm create vvv@latest my-app --daisyui       # pre-select DaisyUI
+npm create vvv@latest my-app --no-git        # skip git init
+npm create vvv@latest my-app --skip-install  # skip npm install
+```
+
+Flags compose freely: `--yes --router` scaffolds with router and accepts defaults for everything else.
+
 ## What you get
 
 ```
@@ -35,19 +47,34 @@ my-project/
 │   ├── favicon.svg
 │   └── robots.txt
 ├── src/
+│   ├── components/        # Your components go here
+│   ├── composables/       # Your composables go here
 │   ├── App.vue            # Root component
+│   ├── App.test.js        # Example Vitest test
 │   ├── main.js            # App entry (Vue + Pinia + @unhead/vue)
 │   └── style.css          # @import "tailwindcss"
-├── .env                   # VITE_API_BASE and private vars
+├── .env                   # Local env vars (gitignored)
+├── .env.example           # Env var reference (committed)
 ├── .gitignore
 ├── eslint.config.js       # ESLint v9 flat config
 ├── index.html
 ├── package.json
 ├── vercel.json
-└── vite.config.js         # Vite + @tailwindcss/vite plugin + vitest
+└── vite.config.js         # Vite + @tailwindcss/vite + @ alias + vitest
 ```
 
 With Vue Router selected, `src/router.js` and `src/pages/` are added.
+
+## Local dev vs Vercel dev
+
+`npm run dev` starts the Vite dev server. It serves your Vue app with hot-module replacement but has no knowledge of your `api/` directory. API calls will fail.
+
+`npm run vercel-dev` (or `npx vercel dev`) starts Vite and also spins up a local Vercel runtime that serves your `api/` functions. Use this when you need to test API routes locally.
+
+| Command | UI | API routes |
+|---|---|---|
+| `npm run dev` | Yes | No |
+| `npm run vercel-dev` | Yes | Yes |
 
 ## Stack
 
@@ -61,7 +88,7 @@ With Vue Router selected, `src/router.js` and `src/pages/` are added.
 | API routes | Vercel serverless functions |
 | Linting | ESLint v9 flat config + `eslint-plugin-vue` |
 | Formatting | Prettier (config in `package.json`) |
-| Git hooks | Husky v9 (pre-commit: Prettier + re-stage) |
+| Git hooks | Husky v9 (pre-commit: Prettier + stage changed files) |
 | Testing | Vitest + `@vue/test-utils` |
 
 ## Environment variables
@@ -75,8 +102,8 @@ PRIVATE_BACKEND_SECRET=replace-this-secret    # server-only
 ## Commands (in generated project)
 
 ```bash
-npm run dev          # Vite dev server
-npx vercel dev       # Vite + API routes locally
+npm run dev          # Vite dev server (UI only)
+npm run vercel-dev   # Vite + API routes locally
 npm run build        # Production build
 npm test             # Vitest
 npm run lint         # ESLint

@@ -33,5 +33,12 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/peterbenoit/VercelViteVue.git"
+	},
+	"homepage": "https://github.com/peterbenoit/VercelViteVue#readme",
+	"bugs": {
+		"url": "https://github.com/peterbenoit/VercelViteVue/issues"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

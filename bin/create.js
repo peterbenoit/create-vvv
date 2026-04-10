@@ -5,6 +5,15 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+// ── Node version guard ────────────────────────────────────────────────────
+const [nodeMajor] = process.versions.node.split('.').map(Number)
+if (nodeMajor < 20) {
+	console.error(
+		`create-vvv requires Node.js 20 or higher.\nYou are running Node.js ${process.versions.node}.\nUpgrade: https://nodejs.org`
+	)
+	process.exit(1)
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const TEMPLATE_DIR = path.join(__dirname, '..', 'template')
 const TEMPLATE_ROUTER_DIR = path.join(__dirname, '..', 'template-router')
@@ -40,44 +49,144 @@ function run(cmd, cwd) {
 	}
 }
 
+function hasGit() {
+	try {
+		execSync('git --version', { stdio: 'pipe' })
+		return true
+	} catch {
+		return false
+	}
+}
+
+/** Detect the package manager that invoked this script. */
+function detectPackageManager() {
+	const agent = process.env.npm_config_user_agent ?? ''
+	if (agent.startsWith('pnpm')) return 'pnpm'
+	if (agent.startsWith('yarn')) return 'yarn'
+	if (agent.startsWith('bun')) return 'bun'
+	return 'npm'
+}
+
+/** Return the install command for a given package manager. */
+function installCmd(pm) {
+	if (pm === 'yarn') return 'yarn'
+	if (pm === 'bun') return 'bun install'
+	return `${pm} install`
+}
+
+/** Return the run command for a given package manager and script. */
+function runCmd(pm, script) {
+	if (pm === 'yarn') return `yarn ${script}`
+	if (pm === 'bun') return `bun run ${script}`
+	return `${pm} run ${script}`
+}
+
+/** Parse --flags from argv; positional args are not touched. */
+function parseFlags(argv) {
+	const flags = {
+		router: false,
+		daisyui: false,
+		git: null,        // null = ask
+		skipInstall: false,
+		yes: false,
+	}
+	for (const arg of argv) {
+		if (arg === '--router') flags.router = true
+		if (arg === '--daisyui') flags.daisyui = true
+		if (arg === '--git') flags.git = true
+		if (arg === '--no-git') flags.git = false
+		if (arg === '--skip-install') flags.skipInstall = true
+		if (arg === '--yes' || arg === '-y') flags.yes = true
+	}
+	return flags
+}
+
 async function main() {
+	const rawArgs = process.argv.slice(2)
+	const flags = parseFlags(rawArgs)
+	// First non-flag positional argument is the project name
+	const argName = rawArgs.find((a) => !a.startsWith('-'))
+	const isDot = argName === '.'
+	const pm = detectPackageManager()
+	const gitAvailable = hasGit()
+
 	console.log()
 	p.intro('  create-vvv  —  Vercel + Vite + Vue  ')
 
-	const argName = process.argv[2]
-	const isDot = argName === '.'
+	let answers
 
-	const answers = await p.group(
-		{
-			projectName: () =>
-				isDot
-					? Promise.resolve('.')
-					: p.text({
-						message: 'Project name',
-						placeholder: 'my-vvv-app',
-						initialValue: argName ?? '',
-						validate(v) {
-							if (!v || v.trim().length === 0) return 'Project name is required'
-							if (!/^[a-z0-9][a-z0-9._-]*$/.test(v.trim()))
-								return 'Use lowercase letters, numbers, hyphens, or dots'
-						},
-					}),
-			useRouter: () =>
-				p.confirm({ message: 'Add Vue Router?', initialValue: false }),
-			addDaisyUI: () =>
-				p.confirm({ message: 'Add DaisyUI?', initialValue: false }),
-			initGit: () =>
-				p.confirm({ message: 'Initialize a git repository?', initialValue: true }),
-		},
-		{
-			onCancel() {
+	if (flags.yes) {
+		// Non-interactive: resolve project name then apply defaults for everything else
+		let projectName
+		if (isDot) {
+			projectName = '.'
+		} else if (argName) {
+			projectName = argName
+		} else {
+			projectName = await p.text({
+				message: 'Project name',
+				placeholder: 'my-vvv-app',
+				validate(v) {
+					if (!v || v.trim().length === 0) return 'Project name is required'
+					if (!/^[a-z0-9][a-z0-9._-]*$/.test(v.trim()))
+						return 'Use lowercase letters, numbers, hyphens, or dots'
+				},
+			})
+			if (p.isCancel(projectName)) {
 				p.cancel('Operation cancelled.')
 				process.exit(0)
-			},
+			}
 		}
-	)
+		answers = {
+			projectName,
+			useRouter: flags.router,
+			addDaisyUI: flags.daisyui,
+			initGit: flags.git ?? gitAvailable,
+		}
+	} else {
+		answers = await p.group(
+			{
+				projectName: () =>
+					isDot
+						? Promise.resolve('.')
+						: p.text({
+							message: 'Project name',
+							placeholder: 'my-vvv-app',
+							initialValue: argName ?? '',
+							validate(v) {
+								if (!v || v.trim().length === 0) return 'Project name is required'
+								if (!/^[a-z0-9][a-z0-9._-]*$/.test(v.trim()))
+									return 'Use lowercase letters, numbers, hyphens, or dots'
+							},
+						}),
+				useRouter: () =>
+					flags.router
+						? Promise.resolve(true)
+						: p.confirm({ message: 'Add Vue Router?', initialValue: false }),
+				addDaisyUI: () =>
+					flags.daisyui
+						? Promise.resolve(true)
+						: p.confirm({ message: 'Add DaisyUI?', initialValue: false }),
+				initGit: () => {
+					if (flags.git !== null) return Promise.resolve(flags.git)
+					if (!gitAvailable) {
+						p.log.warn('git not found — skipping repository initialization')
+						return Promise.resolve(false)
+					}
+					return p.confirm({ message: 'Initialize a git repository?', initialValue: true })
+				},
+			},
+			{
+				onCancel() {
+					p.cancel('Operation cancelled.')
+					process.exit(0)
+				},
+			}
+		)
+	}
 
 	const { projectName, useRouter, addDaisyUI, initGit } = answers
+	const skipInstall = flags.skipInstall
 	const targetDir =
 		projectName === '.' ? process.cwd() : path.resolve(process.cwd(), projectName)
 	const displayName =
@@ -116,26 +225,34 @@ async function main() {
 	}
 
 	// ── Git init (must come before npm install so Husky can attach hooks) ─
+	let gitOk = false
 	if (initGit) {
 		s.start('Initializing git repository')
-		const ok = run('git init', targetDir)
-		s.stop(ok ? 'Git repository initialized' : 'git init failed — run it manually')
+		gitOk = run('git init', targetDir)
+		s.stop(gitOk ? 'Git repository initialized' : 'git init failed — run it manually')
 	}
 
 	// ── Install dependencies ───────────────────────────────────────────────
-	s.start('Installing dependencies (this may take a moment)')
-	const installed = run('npm install', targetDir)
-	s.stop(installed ? 'Dependencies installed' : 'npm install failed — run it manually')
+	let installed = false
+	if (!skipInstall) {
+		s.start(`Installing dependencies via ${pm} (this may take a moment)`)
+		installed = run(installCmd(pm), targetDir)
+		s.stop(
+			installed
+				? 'Dependencies installed'
+				: `${pm} install failed — run it manually`
+		)
+	}
 
 	// ── Husky git hooks ───────────────────────────────────────────────────
-	if (initGit && installed) {
+	if (initGit && gitOk && installed) {
 		s.start('Configuring Husky pre-commit hook')
 		const huskyOk = run('npx husky init', targetDir)
 		if (huskyOk) {
 			const preCommit = path.join(targetDir, '.husky', 'pre-commit')
 			fs.writeFileSync(
 				preCommit,
-				'#!/usr/bin/env sh\nnpx prettier --write .\ngit add .\n'
+				'#!/usr/bin/env sh\nnpx prettier --write .\ngit add -u\n'
 			)
 			try {
 				fs.chmodSync(preCommit, 0o755)
@@ -151,18 +268,24 @@ async function main() {
 	}
 
 	// ── Initial commit ────────────────────────────────────────────────────
-	if (initGit) {
+	if (initGit && gitOk) {
 		s.start('Creating initial commit')
 		run('git add .', targetDir)
 		const committed = run('git commit -m "Initial commit"', targetDir)
 		s.stop(committed ? 'Initial commit created' : 'git commit failed — commit manually')
 	}
 
-	// ── Done ──────────────────────────────────────────────────────────────
-	const cdStep = projectName !== '.' ? `  cd ${projectName}\n` : ''
-	p.outro(
-		`Project ready! Next steps:\n\n${cdStep}  npm run dev         # Vite dev server\n  npx vercel dev      # Vite + API routes\n`
-	)
+	// ── Done: tailored completion message ────────────────────────────────
+	const steps = []
+	if (projectName !== '.') steps.push(`  cd ${projectName}`)
+	if (skipInstall || !installed) {
+		steps.push(`  ${installCmd(pm)}   # install dependencies`)
+	}
+	steps.push(`  ${runCmd(pm, 'dev')}         # Vite dev server (UI only)`)
+	steps.push(`  npx vercel dev      # Vite + API routes locally`)
+	if (useRouter) steps.push(`  # Routes live in src/pages/`)
+
+	p.outro(`Project ready! Next steps:\n\n${steps.join('\n')}\n`)
 }
 
 main().catch((err) => {
