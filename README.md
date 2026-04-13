@@ -8,7 +8,7 @@
 Scaffold a modern Vue 3 project with Vite, Tailwind CSS v4, Pinia, and Vercel serverless API routes — in one command. No bash required, works on any platform.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/peterbenoit/vvv-init/main/screenshots/preview.png" alt="Project Preview" width="600">
+  <img src="https://raw.githubusercontent.com/peterbenoit/VercelViteVue/main/screenshots/preview.png" alt="Project Preview" width="600">
 </p>
 
 ## Usage
@@ -110,7 +110,28 @@ npm run lint         # ESLint
 npm run format       # Prettier
 ```
 
-## Publishing
+## Deploying to Vercel
+
+### Option 1: Vercel CLI (recommended)
+
+```bash
+# First time - link your project
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+### Option 2: GitHub Integration (automatic)
+
+1. Push your code to GitHub
+2. Import your repo at [vercel.com/new](https://vercel.com/new)
+3. Vercel auto-detects Vite and deploys
+4. Every push to `main` auto-deploys
+
+Your API routes in `api/` are automatically deployed as serverless functions. The `vercel.json` config handles routing.
+
+## Publishing (for package maintainers)
 
 ```bash
 # Dry run — check what gets included
