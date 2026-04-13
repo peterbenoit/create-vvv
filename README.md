@@ -8,7 +8,7 @@
 Scaffold a modern Vue 3 project with Vite, Tailwind CSS v4, Pinia, and Vercel serverless API routes — in one command. No bash required, works on any platform.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/peterbenoit/VercelViteVue/main/screenshots/preview.png" alt="Project Preview" width="600">
+  <img src="https://raw.githubusercontent.com/peterbenoit/create-vvv/main/screenshots/preview.png" alt="Project Preview" width="600">
 </p>
 
 ## Usage

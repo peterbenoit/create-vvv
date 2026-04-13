@@ -33,11 +33,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/peterbenoit/VercelViteVue.git"
+		"url": "https://github.com/peterbenoit/create-vvv.git"
 	},
-	"homepage": "https://github.com/peterbenoit/VercelViteVue#readme",
+	"homepage": "https://github.com/peterbenoit/create-vvv#readme",
 	"bugs": {
-		"url": "https://github.com/peterbenoit/VercelViteVue/issues"
+		"url": "https://github.com/peterbenoit/create-vvv/issues"
 	},
 	"publishConfig": {
 		"access": "public"
