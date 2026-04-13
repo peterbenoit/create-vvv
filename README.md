@@ -67,14 +67,14 @@ With Vue Router selected, `src/router.js` and `src/pages/` are added.
 
 ## Local dev vs Vercel dev
 
-`npm run dev` starts the Vite dev server. It serves your Vue app with hot-module replacement but has no knowledge of your `api/` directory. API calls will fail.
+`npm run dev` starts the Vite dev server with hot-module replacement. **Use this for all local development.**
 
-`npm run vercel-dev` (or `npx vercel dev`) starts Vite and also spins up a local Vercel runtime that serves your `api/` functions. Use this when you need to test API routes locally.
+⚠️ **Note:** `vercel dev` currently has compatibility issues with Vite 6 and will throw errors. API routes should be tested after deploying to Vercel, or by creating a separate local development server.
 
-| Command | UI | API routes |
-|---|---|---|
-| `npm run dev` | Yes | No |
-| `npm run vercel-dev` | Yes | Yes |
+| Command | UI | API routes | Status |
+|---|---|---|---|
+| `npm run dev` | ✅ Yes | ❌ No | **Recommended** |
+| `vercel dev` | ⚠️ Issues | ⚠️ Issues | Not compatible with Vite 6 |
 
 ## Stack
 
@@ -102,9 +102,9 @@ PRIVATE_BACKEND_SECRET=replace-this-secret    # server-only
 ## Commands (in generated project)
 
 ```bash
-npm run dev          # Vite dev server (UI only)
-npm run vercel-dev   # Vite + API routes locally
+npm run dev          # Vite dev server
 npm run build        # Production build
+npm run preview      # Preview production build
 npm test             # Vitest
 npm run lint         # ESLint
 npm run format       # Prettier

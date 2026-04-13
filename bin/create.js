@@ -278,12 +278,13 @@ async function main() {
 	// ── Done: tailored completion message ────────────────────────────────
 	const steps = []
 	if (projectName !== '.') steps.push(`  cd ${projectName}`)
-	if (skipInstall || !installed) {
-		steps.push(`  ${installCmd(pm)}   # install dependencies`)
-	}
-	steps.push(`  ${runCmd(pm, 'dev')}         # Vite dev server (UI only)`)
-	steps.push(`  npx vercel dev      # Vite + API routes locally`)
+
+	// Always show npm install as a step to be safe (even if we ran it)
+	steps.push(`  ${installCmd(pm)}   # ensure all dependencies are installed`)
+	steps.push(`  ${runCmd(pm, 'dev')}         # start dev server`)
+	steps.push(`  ${runCmd(pm, 'build')}       # build for production`)
 	if (useRouter) steps.push(`  # Routes live in src/pages/`)
+	steps.push(`  # Note: 'vercel dev' has issues with Vite 6 - use 'npm run dev' instead`)
 
 	p.outro(`Project ready! Next steps:\n\n${steps.join('\n')}\n`)
 }
